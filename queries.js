@@ -83,7 +83,7 @@ class Query {
         } else if (response) {
           reject({
             name: 'Duplicate',
-            message: 'This department already exists'
+            message: 'This role already exists'
           })
         } else {
           resolve('no role with this title exists');

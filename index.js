@@ -81,7 +81,9 @@ const checkDupDep = async (answer) => {
     addCaseWhereTo();
   } catch (err) {
     console.log(err);
-    enteredDupDep();
+    if (err.name === 'Duplicate') {
+      enteredDupDep();
+    }
   }
 }
 
@@ -151,7 +153,25 @@ const checkDupRole = async (answer) => {
     console.log(createRole)
   } catch (err) {
     console.log(err);
+    if (err.name === 'Duplicate') {
+      enteredDupRole();
+    }
   }
+}
+
+const enteredDupRole = () => {
+  inquirer.prompt({
+    name: 'tryAgain',
+    type: 'confirm',
+    message: 'The role you entered has already been created. Would you like to create another role?'
+  }).then(answer => {
+    if (!answer.tryAgain) {
+      addCaseWhereTo();
+      return;
+    }
+    getAllDeps();
+    return;
+  })
 }
 
 // options for the user to navigate after completing an add case option
