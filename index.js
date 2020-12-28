@@ -106,11 +106,16 @@ const getAllDeps = async () => {
   const departmentQuery = new Query();
   try {
     const getDeps = await departmentQuery.getAllDepartments();
-    console.log(getDeps);
+    getRoleInfo(getDeps);
   } catch (err) {
     console.log(err);
   }
 }
+const getRoleInfo = (departments) => {
+  const mappedDepartments = departments.map(({ id, name }) => ({ value: id, name: name }));
+  console.log(mappedDepartments);
+}
+
 
 // GIVES THE USER OPTIONS TO NAGIVATE FROM THE ADD CASE OPTIONS
 const addCaseWhereTo = () => {
