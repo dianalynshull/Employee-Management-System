@@ -119,6 +119,20 @@ class Query {
       resolve(`Role ${this.role.title} created!`)
     })
   }
+
+  getAllEmployees() {
+    return new Promise((resolve, reject) => {
+      connection.query('SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, role.id, role.title FROM employee INNER JOIN role ON employee.role_id=role.id', (err, res) => {
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          });
+        }
+        resolve(res);
+      })
+    })
+  }
 };
 
 module.exports = Query;

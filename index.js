@@ -145,7 +145,7 @@ const getAllRoles = async () => {
   const roleQuery = new Query();
   try {
     const getRoles = await roleQuery.getAllRoles();
-    getEmpInfo(getRoles);
+    getAllEmployees(getRoles);
     return;
   } catch (err) {
     console.log(err);
@@ -217,39 +217,54 @@ const enteredDupRole = () => {
 // EMPLOYEE FUNCTIONS
 
 // *** create getAllEmployees
+const getAllEmployees = async (roles) => {
+  const roleList = roles;
+  const employeeQuery = new Query();
+  try {
+    const getEmployees = await employeeQuery.getAllEmployees();
+    getEmpInfo(roleList, getEmployees)
+    return;
+  } catch (err) {
+    console.log(err);
+  }
+}
 // *** should I get all departments and ask the user what department the employee will be in to filter roles and potential managers?
 // *** should this be an async function and just run each of the get alls inside of it? Or create another function to do that?
 
 // gathers user's role info
-const getEmpInfo = (roles) => {
+const getEmpInfo = (roles, employees) => {
   const mappedRoles = roles.map(({ id, title }) => ({ value: id, name: title }));
-  inquirer.prompt([
-    {
-      name: 'firstName',
-      message: 'Enter the first name of the employee'
-    },
-    {
-      name: 'lastName',
-      message: 'Enter the last name of the employee'
-    },
-    {
-      name: 'role',
-      type: 'list',
-      message: 'Select a role for the employee',
-      choices: mappedRoles
-    },
-    {
-      name: 'needManager',
-      type: 'confirm',
-      message: 'Will this employee have a manager?'
-    }
-  ]).then(answer => {
-    if (answer.needManager) {
-      console.log('still need to create getAll employee function')
-    }
-    else if (!answer.needManager) {
-      console.log(answer);
-    }
-  })
+  const mappedEmployees = employees.map(({ id, first_name, last_name, title }) => ({ value: id, name: `${first_name} ${last_name} - ${title}`}));
+  mappedEmployees.push({ value: null, name: 'Employee Will/Does Not Have Manager' })
+  console.log(mappedEmployees)
+  console.log(mappedRoles)
+  // inquirer.prompt([
+  //   {
+  //     name: 'firstName',
+  //     message: 'Enter the first name of the employee'
+  //   },
+  //   {
+  //     name: 'lastName',
+  //     message: 'Enter the last name of the employee'
+  //   },
+  //   {
+  //     name: 'role',
+  //     type: 'list',
+  //     message: 'Select a role for the employee',
+  //     choices: mappedRoles
+  //   },
+  //   {
+  //     name: 'needManager',
+  //     type: 'confirm',
+  //     message: 'Will this employee have a manager?'
+  //   }
+  // ]).then(answer => {
+  //   if (answer.needManager) {
+  //     console.log('still need to create getAll employee function')
+  //   }
+  //   else if (!answer.needManager) {
+  //     console.log(answer);
+  //   }
+  // })
 }
 startEmployeeManager();
