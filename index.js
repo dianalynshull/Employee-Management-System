@@ -68,6 +68,7 @@ const getDepInfo = () => {
     message: 'Enter the name of the department you would like to add'
   }).then(answer => {
     checkDupDep(answer);
+    return;
   })
 }
 
@@ -79,10 +80,12 @@ const checkDupDep = async (answer) => {
     const createDep = await departmentQuery.getDepartment();
     console.log(createDep);
     addCaseWhereTo();
+    return;
   } catch (err) {
     console.log(err);
     if (err.name === 'Duplicate') {
       enteredDupDep();
+      return;
     }
   }
 }
@@ -108,6 +111,7 @@ const getAllDeps = async () => {
   try {
     const getDeps = await departmentQuery.getAllDepartments();
     getRoleInfo(getDeps);
+    return;
   } catch (err) {
     console.log(err);
   }
@@ -152,10 +156,12 @@ const checkDupRole = async (answer) => {
     const createRole = await roleQuery.getRole();
     console.log(createRole);
     addCaseWhereTo();
+    return;
   } catch (err) {
     console.log(err);
     if (err.name === 'Duplicate') {
       enteredDupRole();
+      return;
     }
   }
 }
