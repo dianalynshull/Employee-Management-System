@@ -92,6 +92,8 @@ const enteredDup = () => {
       addCaseWhereTo();
       return;
     }
+    getDepInfo();
+    return;
   })
 }
 
