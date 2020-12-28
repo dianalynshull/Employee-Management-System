@@ -268,7 +268,7 @@ const checkDupEmp = async (answer) => {
   try {
     const createEmployee = await employeeQuery.getEmployee();
     if (createEmployee.name === 'Potential Duplicate') {
-      console.log('You might have a duplicate employee')
+      enteredDupEmp(createEmployee);
       return;
     }
     console.log(createEmployee)
@@ -277,4 +277,20 @@ const checkDupEmp = async (answer) => {
     console.log(err);
   }
 }
+
+const enteredDupEmp = (employee) => {
+  const dupEmployee = employee;
+  inquirer.prompt({
+    name: 'verify',
+    type: 'confirm', 
+    message: `${dupEmployee.message}. Would you like to continue with creation?`
+  }).then(answer => {
+    if (!answer.verify) {
+      addCaseWhereTo();
+      return;
+    }
+    console.log('okay, lets do it')
+  })
+}
+
 startEmployeeManager();
