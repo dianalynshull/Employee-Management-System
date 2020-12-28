@@ -142,6 +142,18 @@ const getRoleInfo = (departments) => {
   })
 }
 
+// async function that funs Query function getRole to see if a role title is a duplicate
+const checkDupRole = async (answer) => {
+  const roleQuery = new Query();
+  roleQuery.role = answer.title;
+  try {
+    const createRole = await roleQuery.getRole();
+    console.log(createRole)
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 // options for the user to navigate after completing an add case option
 const addCaseWhereTo = () => {
   inquirer.prompt({

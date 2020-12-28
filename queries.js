@@ -70,6 +70,27 @@ class Query {
       resolve(`Department ${this.department} created!`)
     })
   }
+
+  getRole() {
+    return new Promise((resolve, reject) => {
+      connection.query('SELECT title FROM role WHERE ?', { title: this.role }, (err, res) => {
+        const response = res[0];
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          });
+        } else if (response) {
+          reject({
+            name: 'Duplicate',
+            message: 'This department already exists'
+          })
+        } else {
+          resolve('no role with this title exists');
+        }
+      })
+    })
+  }
 };
 
 module.exports = Query;
