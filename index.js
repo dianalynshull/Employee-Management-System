@@ -30,6 +30,7 @@ const startEmployeeManager = () => {
   });
 };
 
+// CREATE CASE FUNCTIONS
 // Create functions
 const createCase = () => {
   inquirer.prompt({
@@ -52,7 +53,8 @@ const createCase = () => {
         getAllDeps();
         return;
       case 'Add an employee':
-        console.log('Creating an employee');
+        // starts with getAllRoles function to get roles as a choice for the employee creation
+        getAllRoles();
         return;
       case 'Go Back':
         startEmployeeManager();
@@ -60,7 +62,40 @@ const createCase = () => {
     }
   });
 };
+// options for the user to navigate after completing an add case option
+const addCaseWhereTo = () => {
+  inquirer.prompt({
+    name: 'whereTo',
+    type: 'list',
+    message: 'What would you like to do?',
+    choices: ['Add something else', 'Start Over', 'Quit']
+  }).then(answer => {
+    switch (answer.whereTo) {
+      case 'Add something else':
+        createCase();
+        return;
+      case 'Start Over':
+        startEmployeeManager();
+        return;
+      case 'Quit':
+        console.log('Thanks for using Employee Manager!');
+        return;
+    }
+  })
+}
 
+// DEPARTMENT FUNCTIONS
+// gets all departments
+const getAllDeps = async () => {
+  const departmentQuery = new Query();
+  try {
+    const getDeps = await departmentQuery.getAllDepartments();
+    getRoleInfo(getDeps);
+    return;
+  } catch (err) {
+    console.log(err);
+  }
+}
 // gathers user's department info
 const getDepInfo = () => {
   inquirer.prompt({
@@ -71,7 +106,6 @@ const getDepInfo = () => {
     return;
   })
 }
-
 // async function that runs Query function getDepartment to see if a department name is a duplicate
 const checkDupDep = async (answer) => {
   const departmentQuery = new Query();
@@ -89,7 +123,6 @@ const checkDupDep = async (answer) => {
     }
   }
 }
-
 // advises the user if their department name is a duplicate and gives them options on what to do next
 const enteredDupDep = () => {
   inquirer.prompt({
@@ -105,19 +138,20 @@ const enteredDupDep = () => {
     return;
   })
 }
-// gets all departments
-const getAllDeps = async () => {
-  const departmentQuery = new Query();
+
+// USER FUNCTIONS
+// gets all roles
+const getAllRoles = async () => {
+  const roleQuery = new Query();
   try {
-    const getDeps = await departmentQuery.getAllDepartments();
-    getRoleInfo(getDeps);
+    const getRoles = await roleQuery.getAllRoles();
+    getEmpInfo(getRoles);
     return;
   } catch (err) {
     console.log(err);
   }
 }
-
-// gathers user's role infor
+// gathers user's role info
 const getRoleInfo = (departments) => {
   const mappedDepartments = departments.map(({ id, name }) => ({ value: id, name: name }));
   inquirer.prompt([
@@ -147,7 +181,6 @@ const getRoleInfo = (departments) => {
     return;
   })
 }
-
 // async function that funs Query function getRole to see if a role title is a duplicate
 const checkDupRole = async (answer) => {
   const roleQuery = new Query();
@@ -165,7 +198,6 @@ const checkDupRole = async (answer) => {
     }
   }
 }
-
 // advises the user if their role title is a duplicate and gives them options on what to do next
 const enteredDupRole = () => {
   inquirer.prompt({
@@ -182,26 +214,42 @@ const enteredDupRole = () => {
   })
 }
 
-// options for the user to navigate after completing an add case option
-const addCaseWhereTo = () => {
-  inquirer.prompt({
-    name: 'whereTo',
-    type: 'list',
-    message: 'What would you like to do?',
-    choices: ['Add something else', 'Start Over', 'Quit']
-  }).then(answer => {
-    switch (answer.whereTo) {
-      case 'Add something else':
-        createCase();
-        return;
-      case 'Start Over':
-        startEmployeeManager();
-        return;
-      case 'Quit':
-        console.log('Thanks for using Employee Manager!');
-        return;
+// EMPLOYEE FUNCTIONS
+
+// *** create getAllEmployees
+// *** should I get all departments and ask the user what department the employee will be in to filter roles and potential managers?
+// *** should this be an async function and just run each of the get alls inside of it? Or create another function to do that?
+
+// gathers user's role info
+const getEmpInfo = (roles) => {
+  const mappedRoles = roles.map(({ id, title }) => ({ value: id, name: title }));
+  inquirer.prompt([
+    {
+      name: 'firstName',
+      message: 'Enter the first name of the employee'
+    },
+    {
+      name: 'lastName',
+      message: 'Enter the last name of the employee'
+    },
+    {
+      name: 'role',
+      type: 'list',
+      message: 'Select a role for the employee',
+      choices: mappedRoles
+    },
+    {
+      name: 'needManager',
+      type: 'confirm',
+      message: 'Will this employee have a manager?'
+    }
+  ]).then(answer => {
+    if (answer.needManager) {
+      console.log('still need to create getAll employee function')
+    }
+    else if (!answer.needManager) {
+      console.log(answer);
     }
   })
 }
-
 startEmployeeManager();

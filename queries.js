@@ -71,6 +71,20 @@ class Query {
     })
   }
 
+  getAllRoles() {
+    return new Promise((resolve, reject) => {
+      connection.query('SELECT id, title FROM role', (err, res) => {
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          });
+        }
+        resolve(res);
+      })
+    })
+  }
+
   getRole() {
     return new Promise((resolve, reject) => {
       connection.query('SELECT title FROM role WHERE ?', { title: this.role.title }, (err, res) => {
