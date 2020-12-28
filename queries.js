@@ -19,6 +19,27 @@ class Query {
     this.role = roleAnswer;
     this.employee = employeeAnswer;
   };
+
+  getDepartment() {
+    return new Promise((resolve, reject) => {
+      connection.query('SELECT name FROM department WHERE ?', { name: this.department }, (err, res) => {
+        const response = res[0];
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          });
+        } else if (response) {
+          reject({
+            name: 'Duplicate',
+            message: 'This deparmtent already exists'
+          })
+        } else {
+          resolve('You can create a department with that name');
+        }
+      })
+    })
+  }
 };
 
 module.exports = Query;

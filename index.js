@@ -45,7 +45,7 @@ const createCase = () => {
   }).then(answer => {
     switch (answer.action) {
       case 'Add a department':
-        createDepartment();
+        getDepInfo();
         return;
       case 'Add a role':
         console.log('creating a role')
@@ -60,21 +60,26 @@ const createCase = () => {
   });
 };
 
-const createDepartment = async () => {
-  try {
-    
-  }
-}
-
-const gatherDepartmentInfo = () => {
+const getDepInfo = () => {
   inquirer.prompt({
     name: 'department',
     message: 'Enter the name of the department you would like to add'
   }).then(answer => {
-    const query = new Query();
-    query.department = answer.department;
-    query.checkDup();
+    checkDupDep(answer);
   })
+}
+// 
+const checkDupDep = async (answer) => {
+  const departmentQuery = new Query();
+  departmentQuery.department = answer.department;
+  try {
+    const notDup = await departmentQuery.getDepartment();
+    console.log(notDup);
+    console.log('still in try')
+  } catch (err) {
+    console.log(err);
+    console.log('reached catch')
+  }
 }
 
 startEmployeeManager();
