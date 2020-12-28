@@ -42,6 +42,7 @@ class Query {
     })
   }
 
+  // CREATES A DEPARTMENT BASED ON USER INPUT
   createDepartment() {
     return new Promise((resolve, reject) => {
       connection.query('INSERT INTO department SET ?', { name: this.department }, (err, res) => {

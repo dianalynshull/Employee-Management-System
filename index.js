@@ -85,6 +85,7 @@ const checkDupDep = async (answer) => {
   }
 }
 
+// ADVISES THE USER THAT THE DEPARTMENT THEY ENTERED IS ALREADY IN THE DATABASE AND ASKS WHAT THEY WOULD LIKE TO DO NEXT
 const enteredDup = () => {
   inquirer.prompt({
     name: 'tryAgain',
@@ -100,6 +101,7 @@ const enteredDup = () => {
   })
 }
 
+// GIVES THE USER OPTIONS TO NAGIVATE FROM THE ADD CASE OPTIONS
 const addCaseWhereTo = () => {
   inquirer.prompt({
     name: 'whereTo',
