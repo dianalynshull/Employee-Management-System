@@ -133,6 +133,27 @@ class Query {
       })
     })
   }
+
+  getEmployee() {
+    return new Promise((resolve, reject) => {
+      connection.query('SELECT first_name, last_name, role_id FROM employee WHERE ?', [{ first_name: this.employee.firstName }, { last_name: this.employee.lastName }, {role_id: this.employee.role}], (err, res) => {
+        const response = res[0];
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          });
+        } else if (response) {
+          resolve({
+            name: 'Potential Duplicate',
+            message: 'An employee with that name and role already exists'
+          })
+        } else {
+          resolve('all newwwwwwww');
+        }
+      })
+    })
+  }
 };
 
 module.exports = Query;

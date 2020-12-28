@@ -139,7 +139,7 @@ const enteredDupDep = () => {
   })
 }
 
-// USER FUNCTIONS
+// ROLE FUNCTIONS
 // gets all roles
 const getAllRoles = async () => {
   const roleQuery = new Query();
@@ -216,7 +216,7 @@ const enteredDupRole = () => {
 
 // EMPLOYEE FUNCTIONS
 
-// *** create getAllEmployees
+// gets all employees
 const getAllEmployees = async (roles) => {
   const roleList = roles;
   const employeeQuery = new Query();
@@ -228,43 +228,53 @@ const getAllEmployees = async (roles) => {
     console.log(err);
   }
 }
-// *** should I get all departments and ask the user what department the employee will be in to filter roles and potential managers?
-// *** should this be an async function and just run each of the get alls inside of it? Or create another function to do that?
+
+// *note* in the future might adjust the to create a getRolesByDep and getEmpByDep function and add an inquirer question to get the department the employee will be in. Once that's gathered, the getRolesByDep will only get roles in that department and the getEmpByDep will only get employees in that department for the manager selection
 
 // gathers user's role info
 const getEmpInfo = (roles, employees) => {
   const mappedRoles = roles.map(({ id, title }) => ({ value: id, name: title }));
   const mappedEmployees = employees.map(({ id, first_name, last_name, title }) => ({ value: id, name: `${first_name} ${last_name} - ${title}`}));
   mappedEmployees.push({ value: null, name: 'Employee Will/Does Not Have Manager' })
-  console.log(mappedEmployees)
-  console.log(mappedRoles)
-  // inquirer.prompt([
-  //   {
-  //     name: 'firstName',
-  //     message: 'Enter the first name of the employee'
-  //   },
-  //   {
-  //     name: 'lastName',
-  //     message: 'Enter the last name of the employee'
-  //   },
-  //   {
-  //     name: 'role',
-  //     type: 'list',
-  //     message: 'Select a role for the employee',
-  //     choices: mappedRoles
-  //   },
-  //   {
-  //     name: 'needManager',
-  //     type: 'confirm',
-  //     message: 'Will this employee have a manager?'
-  //   }
-  // ]).then(answer => {
-  //   if (answer.needManager) {
-  //     console.log('still need to create getAll employee function')
-  //   }
-  //   else if (!answer.needManager) {
-  //     console.log(answer);
-  //   }
-  // })
+  inquirer.prompt([
+    {
+      name: 'firstName',
+      message: 'Enter the first name of the employee'
+    },
+    {
+      name: 'lastName',
+      message: 'Enter the last name of the employee'
+    },
+    {
+      name: 'role',
+      type: 'list',
+      message: 'Select a role for the employee',
+      choices: mappedRoles
+    },
+    {
+      name: 'manager',
+      type: 'list',
+      message: 'Select a manager for the employee (if the employee does not have a manager please select that option)',
+      choices: mappedEmployees
+    }
+  ]).then(answer => {
+    checkDupEmp(answer);
+  })
+}
+
+const checkDupEmp = async (answer) => {
+  const employeeQuery = new Query();
+  employeeQuery.employee = answer;
+  try {
+    const createEmployee = await employeeQuery.getEmployee();
+    if (createEmployee.name === 'Potential Duplicate') {
+      console.log('You might have a duplicate employee')
+      return;
+    }
+    console.log(createEmployee)
+    
+  } catch (err) {
+    console.log(err);
+  }
 }
 startEmployeeManager();
