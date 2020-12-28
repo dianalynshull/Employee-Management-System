@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const Query = require('./db/queries');
 
 const startEmployeeManager = () => {
   inquirer.prompt({

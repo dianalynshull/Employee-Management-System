@@ -12,3 +12,12 @@ connection.connect((err) => {
   if (err) throw err;
   console.log('successfully connected to database');
 });
+
+class Query {
+  constructor(departmentAnswer, roleAnswer) {
+    this.department = departmentAnswer;
+    this.role = roleAnswer;
+  };
+};
+
+module.exports = Query;
