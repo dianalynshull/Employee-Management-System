@@ -113,7 +113,32 @@ const getAllDeps = async () => {
 }
 const getRoleInfo = (departments) => {
   const mappedDepartments = departments.map(({ id, name }) => ({ value: id, name: name }));
-  console.log(mappedDepartments);
+  inquirer.prompt([
+    {
+      name: 'title',
+      message: 'What is the role title?' 
+    },
+    {
+      name: 'salary',
+      type: 'number',
+      message: 'What is the expected salary for the role?'
+    },
+    {
+      name: 'department',
+      type: 'list',
+      message: 'Select a department for the role',
+      choices: mappedDepartments
+    }
+  ]).then(answer => {
+    if (isNaN(answer.salary)) {
+      console.log('Salary needs to be a numerical value. Please try again');
+      const sendDepartments = departments;
+      getRoleInfo(sendDepartments);
+      return;
+    }
+    checkDupRole(answer)
+    return;
+  })
 }
 
 
