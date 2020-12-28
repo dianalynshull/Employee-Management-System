@@ -60,6 +60,7 @@ const createCase = () => {
   });
 };
 
+// GATHERS THE USER'S DEPARTMENT INFORMATION AND SENDS IT TO CHECKDUPDEP FUNCTION
 const getDepInfo = () => {
   inquirer.prompt({
     name: 'department',
@@ -68,14 +69,16 @@ const getDepInfo = () => {
     checkDupDep(answer);
   })
 }
-// 
+
+// ASYNC FUNCTION THAT RUNS QUERIES FUNCTION GETDEPARTMENT TO CATCH IF DEPARTMENT NAME IS A DUPLICATE OR IF THE QUERY FAILS
+// IF GETDEPARTMENT FUNCTION RESOLVES
 const checkDupDep = async (answer) => {
   const departmentQuery = new Query();
   departmentQuery.department = answer.department;
   try {
-    const notDup = await departmentQuery.getDepartment();
-    console.log(notDup);
-    console.log('still in try')
+    const createDep = await departmentQuery.getDepartment();
+    console.log(createDep);
+    addCaseWhereTo();
   } catch (err) {
     console.log(err);
     enteredDup();

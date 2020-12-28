@@ -20,6 +20,7 @@ class Query {
     this.employee = employeeAnswer;
   };
 
+  // QUERIES THE DATABASE TO SEE IF THE DEPARTMENT NAME ENTERED IS A DUPLICATE OR NOT
   getDepartment() {
     return new Promise((resolve, reject) => {
       connection.query('SELECT name FROM department WHERE ?', { name: this.department }, (err, res) => {
@@ -35,9 +36,23 @@ class Query {
             message: 'This deparmtent already exists'
           })
         } else {
-          resolve('You can create a department with that name');
+          resolve(this.createDepartment());
         }
       })
+    })
+  }
+
+  createDepartment() {
+    return new Promise((resolve, reject) => {
+      connection.query('INSERT INTO department SET ?', { name: this.department }, (err, res) => {
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          })
+        };
+      })
+      resolve(`Department ${this.department} created!`)
     })
   }
 };
