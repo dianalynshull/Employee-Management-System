@@ -17,7 +17,7 @@ class Query {
   constructor(departmentAnswer, roleAnswer, employeeAnswer) {
     this.department = departmentAnswer;
     this.role = roleAnswer;
-    this.employee = employeeAnswer
+    this.employee = employeeAnswer;
   };
 };
 

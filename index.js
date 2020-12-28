@@ -45,7 +45,7 @@ const createCase = () => {
   }).then(answer => {
     switch (answer.action) {
       case 'Add a department':
-        console.log('creating a department')
+        createDepartment();
         return;
       case 'Add a role':
         console.log('creating a role')
@@ -59,5 +59,22 @@ const createCase = () => {
     }
   });
 };
+
+const createDepartment = async () => {
+  try {
+    
+  }
+}
+
+const gatherDepartmentInfo = () => {
+  inquirer.prompt({
+    name: 'department',
+    message: 'Enter the name of the department you would like to add'
+  }).then(answer => {
+    const query = new Query();
+    query.department = answer.department;
+    query.checkDup();
+  })
+}
 
 startEmployeeManager();
