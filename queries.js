@@ -20,6 +20,20 @@ class Query {
     this.employee = employeeAnswer;
   };
 
+  getAllDepartments() {
+    return new Promise((resolve, reject) => {
+      connection.query('SELECT * FROM department', (err, res) => {
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          });
+        }
+        resolve(res);
+      })
+    })
+  }
+
   // QUERIES THE DATABASE TO SEE IF THE DEPARTMENT NAME ENTERED IS A DUPLICATE OR NOT
   getDepartment() {
     return new Promise((resolve, reject) => {

@@ -48,7 +48,8 @@ const createCase = () => {
         getDepInfo();
         return;
       case 'Add a role':
-        console.log('creating a role')
+        // STARTS WITH GET DEPS SO THAT WE CAN BUILD THE ROLE DEPARMTNET CHOICES
+        getAllDeps();
         return;
       case 'Add an employee':
         console.log('Creating an employee');
@@ -81,12 +82,12 @@ const checkDupDep = async (answer) => {
     addCaseWhereTo();
   } catch (err) {
     console.log(err);
-    enteredDup();
+    enteredDupDep();
   }
 }
 
 // ADVISES THE USER THAT THE DEPARTMENT THEY ENTERED IS ALREADY IN THE DATABASE AND ASKS WHAT THEY WOULD LIKE TO DO NEXT
-const enteredDup = () => {
+const enteredDupDep = () => {
   inquirer.prompt({
     name: 'tryAgain',
     type: 'confirm',
@@ -99,6 +100,16 @@ const enteredDup = () => {
     getDepInfo();
     return;
   })
+}
+// GETS ALL DEPARTMENTS
+const getAllDeps = async () => {
+  const departmentQuery = new Query();
+  try {
+    const getDeps = await departmentQuery.getAllDepartments();
+    console.log(getDeps);
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 // GIVES THE USER OPTIONS TO NAGIVATE FROM THE ADD CASE OPTIONS
