@@ -73,7 +73,7 @@ class Query {
 
   getRole() {
     return new Promise((resolve, reject) => {
-      connection.query('SELECT title FROM role WHERE ?', { title: this.role }, (err, res) => {
+      connection.query('SELECT title FROM role WHERE ?', { title: this.role.title }, (err, res) => {
         const response = res[0];
         if (err) {
           reject({
@@ -86,9 +86,23 @@ class Query {
             message: 'This role already exists'
           })
         } else {
-          resolve('no role with this title exists');
+          resolve(this.createRole());
         }
       })
+    })
+  }
+
+  createRole() {
+    return new Promise((resolve, reject) => {
+      connection.query('INSERT INTO role SET ?', [{ title: this.role.title }, { salary: this.role.salary }, { department_id: this.role.department }], (err, res) => {
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          })
+        }
+      })
+      resolve(`Role ${this.role.title} created!`)
     })
   }
 };

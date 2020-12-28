@@ -147,10 +147,11 @@ const getRoleInfo = (departments) => {
 // async function that funs Query function getRole to see if a role title is a duplicate
 const checkDupRole = async (answer) => {
   const roleQuery = new Query();
-  roleQuery.role = answer.title;
+  roleQuery.role = answer;
   try {
     const createRole = await roleQuery.getRole();
-    console.log(createRole)
+    console.log(createRole);
+    addCaseWhereTo();
   } catch (err) {
     console.log(err);
     if (err.name === 'Duplicate') {
