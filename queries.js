@@ -14,9 +14,10 @@ connection.connect((err) => {
 });
 
 class Query {
-  constructor(departmentAnswer, roleAnswer) {
+  constructor(departmentAnswer, roleAnswer, employeeAnswer) {
     this.department = departmentAnswer;
     this.role = roleAnswer;
+    this.employee = employeeAnswer
   };
 };
 
