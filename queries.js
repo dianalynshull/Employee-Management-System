@@ -34,7 +34,7 @@ class Query {
     })
   }
 
-  // QUERIES THE DATABASE TO SEE IF THE DEPARTMENT NAME ENTERED IS A DUPLICATE OR NOT
+  // queries the database to verify if user department is a duplicate
   getDepartment() {
     return new Promise((resolve, reject) => {
       connection.query('SELECT name FROM department WHERE ?', { name: this.department }, (err, res) => {
@@ -56,7 +56,7 @@ class Query {
     })
   }
 
-  // CREATES A DEPARTMENT BASED ON USER INPUT
+  // creates new department based on user input
   createDepartment() {
     return new Promise((resolve, reject) => {
       connection.query('INSERT INTO department SET ?', { name: this.department }, (err, res) => {

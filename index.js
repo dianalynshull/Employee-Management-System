@@ -48,7 +48,7 @@ const createCase = () => {
         getDepInfo();
         return;
       case 'Add a role':
-        // STARTS WITH GET DEPS SO THAT WE CAN BUILD THE ROLE DEPARMTNET CHOICES
+        // starts with getAllDeps function to get departments as a choice for the role creation
         getAllDeps();
         return;
       case 'Add an employee':
@@ -61,7 +61,7 @@ const createCase = () => {
   });
 };
 
-// GATHERS THE USER'S DEPARTMENT INFORMATION AND SENDS IT TO CHECKDUPDEP FUNCTION
+// gathers user's department info
 const getDepInfo = () => {
   inquirer.prompt({
     name: 'department',
@@ -71,8 +71,7 @@ const getDepInfo = () => {
   })
 }
 
-// ASYNC FUNCTION THAT RUNS QUERIES FUNCTION GETDEPARTMENT TO CATCH IF DEPARTMENT NAME IS A DUPLICATE OR IF THE QUERY FAILS
-// IF GETDEPARTMENT FUNCTION RESOLVES
+// async function that runs Query function getDepartment to see if a department name is a duplicate
 const checkDupDep = async (answer) => {
   const departmentQuery = new Query();
   departmentQuery.department = answer.department;
@@ -86,7 +85,7 @@ const checkDupDep = async (answer) => {
   }
 }
 
-// ADVISES THE USER THAT THE DEPARTMENT THEY ENTERED IS ALREADY IN THE DATABASE AND ASKS WHAT THEY WOULD LIKE TO DO NEXT
+// advises the user if their department name is a duplicate and gives them options on what to do next
 const enteredDupDep = () => {
   inquirer.prompt({
     name: 'tryAgain',
@@ -101,7 +100,7 @@ const enteredDupDep = () => {
     return;
   })
 }
-// GETS ALL DEPARTMENTS
+// gets all departments
 const getAllDeps = async () => {
   const departmentQuery = new Query();
   try {
@@ -111,6 +110,8 @@ const getAllDeps = async () => {
     console.log(err);
   }
 }
+
+// gathers user's role infor
 const getRoleInfo = (departments) => {
   const mappedDepartments = departments.map(({ id, name }) => ({ value: id, name: name }));
   inquirer.prompt([
@@ -141,8 +142,7 @@ const getRoleInfo = (departments) => {
   })
 }
 
-
-// GIVES THE USER OPTIONS TO NAGIVATE FROM THE ADD CASE OPTIONS
+// options for the user to navigate after completing an add case option
 const addCaseWhereTo = () => {
   inquirer.prompt({
     name: 'whereTo',
