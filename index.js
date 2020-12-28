@@ -267,29 +267,30 @@ const checkDupEmp = async (answer) => {
   employeeQuery.employee = answer;
   try {
     const createEmployee = await employeeQuery.getEmployee();
+    console.log(createEmployee);
     if (createEmployee.name === 'Potential Duplicate') {
-      enteredDupEmp(createEmployee);
+      enteredDupEmp(createEmployee, employeeQuery);
       return;
     }
-    console.log(createEmployee)
-    
   } catch (err) {
     console.log(err);
   }
 }
 
-const enteredDupEmp = (employee) => {
+const enteredDupEmp = (employee, Query) => {
   const dupEmployee = employee;
+  const employeeQuery = Query;
   inquirer.prompt({
     name: 'verify',
     type: 'confirm', 
     message: `${dupEmployee.message}. Would you like to continue with creation?`
-  }).then(answer => {
+  }).then (async (answer) => {
     if (!answer.verify) {
       addCaseWhereTo();
       return;
     }
-    console.log('okay, lets do it')
+    const createEmployee = await employeeQuery.createEmployee();
+    console.log(createEmployee);
   })
 }
 

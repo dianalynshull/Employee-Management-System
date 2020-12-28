@@ -108,7 +108,7 @@ class Query {
 
   createRole() {
     return new Promise((resolve, reject) => {
-      connection.query('INSERT INTO role SET ?', [{ title: this.role.title }, { salary: this.role.salary }, { department_id: this.role.department }], (err, res) => {
+      connection.query('INSERT INTO role SET ?', { title: this.role.title, salary: this.role.salary, department_id: this.role.department }, (err, res) => {
         if (err) {
           reject({
             name: 'Query Failed',
@@ -136,7 +136,7 @@ class Query {
 
   getEmployee() {
     return new Promise((resolve, reject) => {
-      connection.query('SELECT first_name, last_name, role_id FROM employee WHERE ?', [{ first_name: this.employee.firstName }, { last_name: this.employee.lastName }, {role_id: this.employee.role}], (err, res) => {
+      connection.query(`SELECT first_name, last_name, role_id FROM employee WHERE first_name = '${this.employee.firstName}' AND last_name = '${this.employee.lastName}' AND role_id = '${this.employee.role}'`, (err, res) => {
         const response = res[0];
         if (err) {
           reject({
@@ -149,9 +149,23 @@ class Query {
             message: 'An employee with that name and role already exists'
           })
         } else {
-          resolve('all newwwwwwww');
+          resolve(this.createEmployee());
         }
       })
+    })
+  }
+
+  createEmployee() {
+    return new Promise((resolve, reject) => {
+      connection.query('INSERT INTO employee SET ?', { first_name: this.employee.firstName, last_name: this.employee.lastName, role_id: this.employee.role, manager_id: this.employee.manager }, (err, res) => {
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          })
+        }
+      })
+      resolve(`Employee ${this.employee.firstName} ${this.employee.lastName} created!`)
     })
   }
 };
