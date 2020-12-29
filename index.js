@@ -8,7 +8,7 @@ const startEmployeeManager = () => {
     type: 'list',
     message: 'What would you like to do?',
     choices: [
-      'Add a department, role, and/or employee',
+      'Create a department, role, and/or employee',
       'View departments, roles, and/or employees',
       'Edit a department, role, and/or employee',
       'Delete a department, role, and/or employee',
@@ -16,7 +16,7 @@ const startEmployeeManager = () => {
     ]
   }).then(answer => {
     switch (answer.action) {
-      case 'Add a department, role, and/or employee':
+      case 'Create a department, role, and/or employee':
         createCase();
         return;
       case 'View departments, roles, and/or employees':
@@ -42,25 +42,25 @@ const createCase = () => {
   inquirer.prompt({
     name: 'action',
     type: 'list',
-    message: 'What would you like to add?',
+    message: 'What would you like to create?',
     choices: [
-      'Add a department',
-      'Add a role',
-      'Add an employee',
+      'Create a department',
+      'Create a role',
+      'Create an employee',
       'Go Back'
     ]
   }).then(answer => {
     switch (answer.action) {
-      case 'Add a department':
-        getDepInfo();
+      case 'Create a department':
+        getDepInfo('create');
         return;
-      case 'Add a role':
+      case 'Create a role':
         // starts with getAllDeps function to get departments as a choice for the role creation
-        getAllDeps('addRole');
+        getAllDeps('create');
         return;
-      case 'Add an employee':
+      case 'Create an employee':
         // starts with getAllRoles function to get roles as a choice for the employee creation
-        getAllRoles();
+        getAllRoles('create');
         return;
       case 'Go Back':
         startEmployeeManager();
@@ -68,16 +68,16 @@ const createCase = () => {
     }
   });
 };
-// options for the user to navigate after completing an add case option
-const addCaseWhereTo = () => {
+// options for the user to navigate after completing an create case option
+const createCaseWhereTo = () => {
   inquirer.prompt({
     name: 'whereTo',
     type: 'list',
     message: 'What would you like to do?',
-    choices: ['Add something else', 'Start Over', 'Quit']
+    choices: ['Create something else', 'Start Over', 'Quit']
   }).then(answer => {
     switch (answer.whereTo) {
-      case 'Add something else':
+      case 'Create something else':
         createCase();
         return;
       case 'Start Over':
@@ -106,13 +106,13 @@ const viewCase = () => {
     .then(answer => {
       switch (answer.action) {
         case 'View departments':
-          getAllDeps('viewAllDeps');
+          getAllDeps('view');
           return;
         case 'View roles':
-          console.log('Displaying role');
+          getAllRoles('view');
           return;
         case 'View employees':
-          console.log('Displaying an employee');
+          getAllEmployees(null, 'view');
           return;
         case 'Go Back':
           startEmployeeManager();
@@ -148,14 +148,15 @@ const getAllDeps = async (type) => {
   const departmentQuery = new Query();
   try {
     const getDeps = await departmentQuery.getAllDepartments();
-    if (type === 'addRole') {
-      getRoleInfo(getDeps);
-      return;
+    switch (type) {
+      case 'create':
+        getRoleInfo(getDeps);
+        return;
+      case 'view':
+        console.table(getDeps);
+        viewCaseWhereTo();
+        return;
     }
-    else if (type === 'viewAllDeps');
-    console.table(getDeps);
-    viewCaseWhereTo();
-    return;
   } catch (err) {
     console.log(err);
   }
@@ -164,7 +165,7 @@ const getAllDeps = async (type) => {
 const getDepInfo = () => {
   inquirer.prompt({
     name: 'department',
-    message: 'Enter the name of the department you would like to add'
+    message: 'Enter the name of the department you would like to create'
   }).then(answer => {
     checkDupDep(answer);
     return;
@@ -177,7 +178,7 @@ const checkDupDep = async (answer) => {
   try {
     const createDep = await departmentQuery.getDepartment();
     console.log(createDep);
-    addCaseWhereTo();
+    createCaseWhereTo();
     return;
   } catch (err) {
     console.log(err);
@@ -195,7 +196,7 @@ const enteredDupDep = () => {
     message: 'The department you entered has already been created. Would you like to create another department?'
   }).then(answer => {
     if (!answer.tryAgain) {
-      addCaseWhereTo();
+      createCaseWhereTo();
       return;
     }
     getDepInfo();
@@ -205,12 +206,20 @@ const enteredDupDep = () => {
 
 // ROLE FUNCTIONS
 // gets all roles
-const getAllRoles = async () => {
+const getAllRoles = async (type) => {
   const roleQuery = new Query();
+  const caseType = type;
   try {
     const getRoles = await roleQuery.getAllRoles();
-    getAllEmployees(getRoles);
-    return;
+    switch (type) {
+      case 'create':
+        getAllEmployees(getRoles, caseType);
+        return;
+      case 'view':
+        console.table(getRoles);
+        viewCaseWhereTo();
+        return;
+    }
   } catch (err) {
     console.log(err);
   }
@@ -252,7 +261,7 @@ const checkDupRole = async (answer) => {
   try {
     const createRole = await roleQuery.getRole();
     console.log(createRole);
-    addCaseWhereTo();
+    createCaseWhereTo();
     return;
   } catch (err) {
     console.log(err);
@@ -270,7 +279,7 @@ const enteredDupRole = () => {
     message: 'The role you entered has already been created. Would you like to create another role?'
   }).then(answer => {
     if (!answer.tryAgain) {
-      addCaseWhereTo();
+      createCaseWhereTo();
       return;
     }
     getAllDeps();
@@ -281,19 +290,26 @@ const enteredDupRole = () => {
 // EMPLOYEE FUNCTIONS
 
 // gets all employees
-const getAllEmployees = async (roles) => {
+const getAllEmployees = async (roles, type) => {
   const roleList = roles;
   const employeeQuery = new Query();
   try {
     const getEmployees = await employeeQuery.getAllEmployees();
-    getEmpInfo(roleList, getEmployees);
-    return;
+    switch (type) {
+      case 'create':
+        getEmpInfo(roleList, getEmployees);
+        return;
+      case 'view':
+        console.table(getEmployees);
+        viewCaseWhereTo();
+        return;
+    }
   } catch (err) {
     console.log(err);
   }
 };
 
-// *note* in the future might adjust the to create a getRolesByDep and getEmpByDep function and add an inquirer question to get the department the employee will be in. Once that's gathered, the getRolesByDep will only get roles in that department and the getEmpByDep will only get employees in that department for the manager selection
+// *note* in the future might adjust the to create a getRolesByDep and getEmpByDep function and create an inquirer question to get the department the employee will be in. Once that's gathered, the getRolesByDep will only get roles in that department and the getEmpByDep will only get employees in that department for the manager selection
 
 // gathers user's role info
 const getEmpInfo = (roles, employees) => {
@@ -336,7 +352,7 @@ const checkDupEmp = async (answer) => {
       return;
     }
     console.log(createEmployee);
-    addCaseWhereTo();
+    createCaseWhereTo();
     return;
   } catch (err) {
     console.log(err);
@@ -352,12 +368,12 @@ const enteredDupEmp = (employee, Query) => {
     message: `${dupEmployee.message}. Would you like to continue with creation?`
   }).then(async (answer) => {
     if (!answer.verify) {
-      addCaseWhereTo();
+      createCaseWhereTo();
       return;
     }
     const createEmployee = await employeeQuery.createEmployee();
     console.log(createEmployee);
-    addCaseWhereTo();
+    createCaseWhereTo();
     return;
   });
 };
