@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const Query = require('./queries');
+const consoleTable = require('console.table');
 
 const startEmployeeManager = () => {
   inquirer.prompt({
@@ -8,7 +9,8 @@ const startEmployeeManager = () => {
     message: 'What would you like to do?',
     choices: [
       'Add a department, role, and/or employee',
-      'View/Edit a department, role, and/or employee',
+      'View departments, roles, and/or employees',
+      'Edit a department, role, and/or employee',
       'Delete a department, role, and/or employee',
       'Quit'
     ]
@@ -17,8 +19,11 @@ const startEmployeeManager = () => {
       case 'Add a department, role, and/or employee':
         createCase();
         return;
-      case 'View/Edit a department, role, and/or employee':
-        console.log('view/edit case');
+      case 'View departments, roles, and/or employees':
+        viewCase();
+        return;
+      case 'Edit a department, role, and/or employee':
+        console.log('edit case');
         return;
       case 'Delete a department, role, and/or employee':
         console.log('delete case');
@@ -30,8 +35,9 @@ const startEmployeeManager = () => {
   });
 };
 
-// CREATE CASE FUNCTIONS
-// Create functions
+startEmployeeManager();
+
+// Create function
 const createCase = () => {
   inquirer.prompt({
     name: 'action',
@@ -50,7 +56,7 @@ const createCase = () => {
         return;
       case 'Add a role':
         // starts with getAllDeps function to get departments as a choice for the role creation
-        getAllDeps();
+        getAllDeps('addRole');
         return;
       case 'Add an employee':
         // starts with getAllRoles function to get roles as a choice for the employee creation
@@ -81,21 +87,79 @@ const addCaseWhereTo = () => {
         console.log('Thanks for using Employee Manager!');
         return;
     }
-  })
-}
+  });
+};
+// View Functions
+const viewCase = () => {
+  inquirer
+    .prompt({
+      name: 'action',
+      type: 'list',
+      message: 'What would you like to view?',
+      choices: [
+        'View departments',
+        'View roles',
+        'View employees',
+        'Go Back'
+      ]
+    })
+    .then(answer => {
+      switch (answer.action) {
+        case 'View departments':
+          getAllDeps('viewAllDeps');
+          return;
+        case 'View roles':
+          console.log('Displaying role');
+          return;
+        case 'View employees':
+          console.log('Displaying an employee');
+          return;
+        case 'Go Back':
+          startEmployeeManager();
+          return;
+      }
+    });
+};
+// options for the user to navigate after completing an view case option
+const viewCaseWhereTo = () => {
+  inquirer.prompt({
+    name: 'whereTo',
+    type: 'list',
+    message: 'What would you like to do?',
+    choices: ['View something else', 'Start Over', 'Quit']
+  }).then(answer => {
+    switch (answer.whereTo) {
+      case 'View something else':
+        viewCase();
+        return;
+      case 'Start Over':
+        startEmployeeManager();
+        return;
+      case 'Quit':
+        console.log('Thanks for using Employee Manager!');
+        return;
+    }
+  });
+};
 
 // DEPARTMENT FUNCTIONS
 // gets all departments
-const getAllDeps = async () => {
+const getAllDeps = async (type) => {
   const departmentQuery = new Query();
   try {
     const getDeps = await departmentQuery.getAllDepartments();
-    getRoleInfo(getDeps);
+    if (type === 'addRole') {
+      getRoleInfo(getDeps);
+      return;
+    }
+    else if (type === 'viewAllDeps');
+    console.table(getDeps);
+    viewCaseWhereTo();
     return;
   } catch (err) {
     console.log(err);
   }
-}
+};
 // gathers user's department info
 const getDepInfo = () => {
   inquirer.prompt({
@@ -104,8 +168,8 @@ const getDepInfo = () => {
   }).then(answer => {
     checkDupDep(answer);
     return;
-  })
-}
+  });
+};
 // async function that runs Query function getDepartment to see if a department name is a duplicate
 const checkDupDep = async (answer) => {
   const departmentQuery = new Query();
@@ -122,7 +186,7 @@ const checkDupDep = async (answer) => {
       return;
     }
   }
-}
+};
 // advises the user if their department name is a duplicate and gives them options on what to do next
 const enteredDupDep = () => {
   inquirer.prompt({
@@ -136,8 +200,8 @@ const enteredDupDep = () => {
     }
     getDepInfo();
     return;
-  })
-}
+  });
+};
 
 // ROLE FUNCTIONS
 // gets all roles
@@ -150,14 +214,14 @@ const getAllRoles = async () => {
   } catch (err) {
     console.log(err);
   }
-}
+};
 // gathers user's role info
 const getRoleInfo = (departments) => {
   const mappedDepartments = departments.map(({ id, name }) => ({ value: id, name: name }));
   inquirer.prompt([
     {
       name: 'title',
-      message: 'What is the role title?' 
+      message: 'What is the role title?'
     },
     {
       name: 'salary',
@@ -177,10 +241,10 @@ const getRoleInfo = (departments) => {
       getRoleInfo(sendDepartments);
       return;
     }
-    checkDupRole(answer)
+    checkDupRole(answer);
     return;
-  })
-}
+  });
+};
 // async function that funs Query function getRole to see if a role title is a duplicate
 const checkDupRole = async (answer) => {
   const roleQuery = new Query();
@@ -197,7 +261,7 @@ const checkDupRole = async (answer) => {
       return;
     }
   }
-}
+};
 // advises the user if their role title is a duplicate and gives them options on what to do next
 const enteredDupRole = () => {
   inquirer.prompt({
@@ -211,8 +275,8 @@ const enteredDupRole = () => {
     }
     getAllDeps();
     return;
-  })
-}
+  });
+};
 
 // EMPLOYEE FUNCTIONS
 
@@ -222,20 +286,20 @@ const getAllEmployees = async (roles) => {
   const employeeQuery = new Query();
   try {
     const getEmployees = await employeeQuery.getAllEmployees();
-    getEmpInfo(roleList, getEmployees)
+    getEmpInfo(roleList, getEmployees);
     return;
   } catch (err) {
     console.log(err);
   }
-}
+};
 
 // *note* in the future might adjust the to create a getRolesByDep and getEmpByDep function and add an inquirer question to get the department the employee will be in. Once that's gathered, the getRolesByDep will only get roles in that department and the getEmpByDep will only get employees in that department for the manager selection
 
 // gathers user's role info
 const getEmpInfo = (roles, employees) => {
   const mappedRoles = roles.map(({ id, title }) => ({ value: id, name: title }));
-  const mappedEmployees = employees.map(({ id, first_name, last_name, title }) => ({ value: id, name: `${first_name} ${last_name} - ${title}`}));
-  mappedEmployees.push({ value: null, name: 'Employee Will/Does Not Have Manager' })
+  const mappedEmployees = employees.map(({ id, first_name, last_name, title }) => ({ value: id, name: `${first_name} ${last_name} - ${title}` }));
+  mappedEmployees.push({ value: null, name: 'Employee Will/Does Not Have Manager' });
   inquirer.prompt([
     {
       name: 'firstName',
@@ -259,39 +323,41 @@ const getEmpInfo = (roles, employees) => {
     }
   ]).then(answer => {
     checkDupEmp(answer);
-  })
-}
+  });
+};
 
 const checkDupEmp = async (answer) => {
   const employeeQuery = new Query();
   employeeQuery.employee = answer;
   try {
     const createEmployee = await employeeQuery.getEmployee();
-    console.log(createEmployee);
     if (createEmployee.name === 'Potential Duplicate') {
       enteredDupEmp(createEmployee, employeeQuery);
       return;
     }
+    console.log(createEmployee);
+    addCaseWhereTo();
+    return;
   } catch (err) {
     console.log(err);
   }
-}
+};
 
 const enteredDupEmp = (employee, Query) => {
   const dupEmployee = employee;
   const employeeQuery = Query;
   inquirer.prompt({
     name: 'verify',
-    type: 'confirm', 
+    type: 'confirm',
     message: `${dupEmployee.message}. Would you like to continue with creation?`
-  }).then (async (answer) => {
+  }).then(async (answer) => {
     if (!answer.verify) {
       addCaseWhereTo();
       return;
     }
     const createEmployee = await employeeQuery.createEmployee();
     console.log(createEmployee);
-  })
-}
-
-startEmployeeManager();
+    addCaseWhereTo();
+    return;
+  });
+};

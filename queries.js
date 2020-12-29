@@ -18,7 +18,7 @@ class Query {
     this.department = departmentAnswer;
     this.role = roleAnswer;
     this.employee = employeeAnswer;
-  };
+  }
 
   getAllDepartments() {
     return new Promise((resolve, reject) => {
@@ -30,8 +30,8 @@ class Query {
           });
         }
         resolve(res);
-      })
-    })
+      });
+    });
   }
 
   // queries the database to verify if user department is a duplicate
@@ -48,12 +48,12 @@ class Query {
           reject({
             name: 'Duplicate',
             message: 'This deparmtent already exists'
-          })
+          });
         } else {
           resolve(this.createDepartment());
         }
-      })
-    })
+      });
+    });
   }
 
   // creates new department based on user input
@@ -64,11 +64,11 @@ class Query {
           reject({
             name: 'Query Failed',
             message: err
-          })
-        };
-      })
-      resolve(`Department ${this.department} created!`)
-    })
+          });
+        }
+      });
+      resolve(`Department ${this.department} created!`);
+    });
   }
 
   getAllRoles() {
@@ -81,8 +81,8 @@ class Query {
           });
         }
         resolve(res);
-      })
-    })
+      });
+    });
   }
 
   getRole() {
@@ -98,12 +98,12 @@ class Query {
           reject({
             name: 'Duplicate',
             message: 'This role already exists'
-          })
+          });
         } else {
           resolve(this.createRole());
         }
-      })
-    })
+      });
+    });
   }
 
   createRole() {
@@ -113,11 +113,11 @@ class Query {
           reject({
             name: 'Query Failed',
             message: err
-          })
+          });
         }
-      })
-      resolve(`Role ${this.role.title} created!`)
-    })
+      });
+      resolve(`Role ${this.role.title} created!`);
+    });
   }
 
   getAllEmployees() {
@@ -130,8 +130,8 @@ class Query {
           });
         }
         resolve(res);
-      })
-    })
+      });
+    });
   }
 
   getEmployee() {
@@ -147,12 +147,12 @@ class Query {
           resolve({
             name: 'Potential Duplicate',
             message: 'An employee with that name and role already exists'
-          })
+          });
         } else {
           resolve(this.createEmployee());
         }
-      })
-    })
+      });
+    });
   }
 
   createEmployee() {
@@ -162,12 +162,12 @@ class Query {
           reject({
             name: 'Query Failed',
             message: err
-          })
+          });
         }
-      })
-      resolve(`Employee ${this.employee.firstName} ${this.employee.lastName} created!`)
-    })
+      });
+      resolve(`Employee ${this.employee.firstName} ${this.employee.lastName} created!`);
+    });
   }
-};
+}
 
 module.exports = Query;
