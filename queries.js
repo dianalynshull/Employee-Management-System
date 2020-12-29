@@ -35,9 +35,9 @@ class Query {
   }
 
   // queries the database to verify if user department is a duplicate
-  getDepartment() {
+  getDepartment(type) {
     return new Promise((resolve, reject) => {
-      connection.query('SELECT name FROM department WHERE ?', { name: this.department }, (err, res) => {
+      connection.query('SELECT name FROM department WHERE ?', { name: this.department.name }, (err, res) => {
         const response = res[0];
         if (err) {
           reject({
@@ -50,7 +50,14 @@ class Query {
             message: 'This deparmtent already exists'
           });
         } else {
-          resolve(this.createDepartment());
+          switch (type) {
+            case 'create':
+              resolve(this.createDepartment());
+              return;
+            case 'edit':
+              resolve(this.editDepartment());
+              return;
+          }
         }
       });
     });
@@ -59,7 +66,7 @@ class Query {
   // creates new department based on user input
   createDepartment() {
     return new Promise((resolve, reject) => {
-      connection.query('INSERT INTO department SET ?', { name: this.department }, (err, res) => {
+      connection.query('INSERT INTO department SET ?', { name: this.department.name }, (err, res) => {
         if (err) {
           reject({
             name: 'Query Failed',
@@ -67,10 +74,26 @@ class Query {
           });
         }
       });
-      resolve(`Department ${this.department} created!`);
+      resolve(`Department ${this.department.name} created!`);
     });
   }
 
+  // edits an already created department
+  editDepartment() {
+    return new Promise((resolve, reject) => {
+      connection.query('UPDATE department SET ? WHERE ?', [{ name: this.department.name }, { id: this.department.id }], (err, res) => {
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          });
+        }
+      });
+      resolve(`Department ${this.department.name} updated!`);
+    });
+  }
+
+  // gets all roles
   getAllRoles() {
     return new Promise((resolve, reject) => {
       connection.query('SELECT id, title FROM role', (err, res) => {
@@ -85,6 +108,7 @@ class Query {
     });
   }
 
+  // queries the database to verify if user role is a duplicate
   getRole() {
     return new Promise((resolve, reject) => {
       connection.query('SELECT title FROM role WHERE ?', { title: this.role.title }, (err, res) => {
@@ -106,6 +130,7 @@ class Query {
     });
   }
 
+  // creates new role based on user input
   createRole() {
     return new Promise((resolve, reject) => {
       connection.query('INSERT INTO role SET ?', { title: this.role.title, salary: this.role.salary, department_id: this.role.department }, (err, res) => {
@@ -120,6 +145,7 @@ class Query {
     });
   }
 
+  // gets all employees
   getAllEmployees() {
     return new Promise((resolve, reject) => {
       connection.query('SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, role.id, role.title FROM employee INNER JOIN role ON employee.role_id=role.id', (err, res) => {
@@ -134,6 +160,7 @@ class Query {
     });
   }
 
+  // queries the database to verify if employee entered is a duplicate
   getEmployee() {
     return new Promise((resolve, reject) => {
       connection.query(`SELECT first_name, last_name, role_id FROM employee WHERE first_name = '${this.employee.firstName}' AND last_name = '${this.employee.lastName}' AND role_id = '${this.employee.role}'`, (err, res) => {
@@ -155,6 +182,7 @@ class Query {
     });
   }
 
+  // creates new employee based on user input
   createEmployee() {
     return new Promise((resolve, reject) => {
       connection.query('INSERT INTO employee SET ?', { first_name: this.employee.firstName, last_name: this.employee.lastName, role_id: this.employee.role, manager_id: this.employee.manager }, (err, res) => {

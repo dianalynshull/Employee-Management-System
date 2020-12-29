@@ -23,7 +23,7 @@ const startEmployeeManager = () => {
         viewCase();
         return;
       case 'Edit a department, role, and/or employee':
-        console.log('edit case');
+        editCase();
         return;
       case 'Delete a department, role, and/or employee':
         console.log('delete case');
@@ -91,34 +91,32 @@ const createCaseWhereTo = () => {
 };
 // View Functions
 const viewCase = () => {
-  inquirer
-    .prompt({
-      name: 'action',
-      type: 'list',
-      message: 'What would you like to view?',
-      choices: [
-        'View departments',
-        'View roles',
-        'View employees',
-        'Go Back'
-      ]
-    })
-    .then(answer => {
-      switch (answer.action) {
-        case 'View departments':
-          getAllDeps('view');
-          return;
-        case 'View roles':
-          getAllRoles('view');
-          return;
-        case 'View employees':
-          getAllEmployees(null, 'view');
-          return;
-        case 'Go Back':
-          startEmployeeManager();
-          return;
-      }
-    });
+  inquirer.prompt({
+    name: 'action',
+    type: 'list',
+    message: 'What would you like to view?',
+    choices: [
+      'View departments',
+      'View roles',
+      'View employees',
+      'Go Back'
+    ]
+  }).then(answer => {
+    switch (answer.action) {
+      case 'View departments':
+        getAllDeps('view');
+        return;
+      case 'View roles':
+        getAllRoles('view');
+        return;
+      case 'View employees':
+        getAllEmployees(null, 'view');
+        return;
+      case 'Go Back':
+        startEmployeeManager();
+        return;
+    }
+  });
 };
 // options for the user to navigate after completing an view case option
 const viewCaseWhereTo = () => {
@@ -142,6 +140,35 @@ const viewCaseWhereTo = () => {
   });
 };
 
+const editCase = () => {
+  inquirer.prompt({
+    name: 'action',
+    type: 'list',
+    message: 'What would you like to edit?',
+    choices: [
+      'Edit departments',
+      'Edit roles',
+      'Edit employees',
+      'Go Back'
+    ]
+  }).then(answer => {
+    switch (answer.action) {
+      case 'Edit departments':
+        getAllDeps('edit');
+        return;
+      case 'Edit roles':
+        getAllRoles('edit');
+        return;
+      case 'Edit employees':
+        getAllEmployees(null, 'edit');
+        return;
+      case 'Go Back':
+        startEmployeeManager();
+        return;
+    }
+  });
+};
+
 // DEPARTMENT FUNCTIONS
 // gets all departments
 const getAllDeps = async (type) => {
@@ -156,29 +183,69 @@ const getAllDeps = async (type) => {
         console.table(getDeps);
         viewCaseWhereTo();
         return;
+      case 'edit': {
+        selectDepEdit(getDeps, type);
+        return;
+      }
     }
   } catch (err) {
     console.log(err);
   }
 };
 // gathers user's department info
-const getDepInfo = () => {
+const getDepInfo = (type) => {
   inquirer.prompt({
-    name: 'department',
+    name: 'name',
     message: 'Enter the name of the department you would like to create'
   }).then(answer => {
-    checkDupDep(answer);
+    checkDupDepCreate(answer, type);
+    return;
+  });
+};
+// gives all departments for the user to select which one to edit
+const selectDepEdit = (departments, type) => {
+  const mappedDepartments = departments.map(({ id, name }) => ({ value: id, name: name }));
+  inquirer.prompt([
+    {
+      name: 'id',
+      type: 'list',
+      message: 'Select the department you would like to edit',
+      choices: mappedDepartments
+    },
+    {
+      name: 'name',
+      message: 'Enter the new name of the department'
+    }
+  ]).then(answer => {
+    checkDupDepEdit(answer, type);
     return;
   });
 };
 // async function that runs Query function getDepartment to see if a department name is a duplicate
-const checkDupDep = async (answer) => {
+const checkDupDepCreate = async (answer, type) => {
   const departmentQuery = new Query();
-  departmentQuery.department = answer.department;
+  departmentQuery.department = answer;
   try {
-    const createDep = await departmentQuery.getDepartment();
-    console.log(createDep);
+    const checkDep = await departmentQuery.getDepartment(type);
+    console.log(checkDep);
     createCaseWhereTo();
+    return;
+  } catch (err) {
+    console.log(err);
+    if (err.name === 'Duplicate') {
+      enteredDupDep();
+      return;
+    }
+  }
+};
+
+const checkDupDepEdit = async (answer, type) => {
+  const departmentQuery = new Query();
+  departmentQuery.department = answer;
+  try {
+    const checkDep = await departmentQuery.getDepartment(type);
+    console.log(checkDep);
+    // createCaseWhereTo();
     return;
   } catch (err) {
     console.log(err);
@@ -208,12 +275,11 @@ const enteredDupDep = () => {
 // gets all roles
 const getAllRoles = async (type) => {
   const roleQuery = new Query();
-  const caseType = type;
   try {
     const getRoles = await roleQuery.getAllRoles();
     switch (type) {
       case 'create':
-        getAllEmployees(getRoles, caseType);
+        getAllEmployees(getRoles, type);
         return;
       case 'view':
         console.table(getRoles);
