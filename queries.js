@@ -8,11 +8,6 @@ const connection = mysql.createConnection({
   database: 'employee_db'
 });
 
-connection.connect((err) => {
-  if (err) throw err;
-  console.log('successfully connected to database');
-});
-
 class Query {
   constructor(departmentAnswer, roleAnswer, employeeAnswer) {
     this.department = departmentAnswer;
@@ -109,7 +104,7 @@ class Query {
   }
 
   // queries the database to verify if user role is a duplicate
-  getRole() {
+  getRole(type) {
     return new Promise((resolve, reject) => {
       connection.query('SELECT title FROM role WHERE ?', { title: this.role.title }, (err, res) => {
         const response = res[0];
@@ -124,7 +119,14 @@ class Query {
             message: 'This role already exists'
           });
         } else {
-          resolve(this.createRole());
+          switch (type) {
+            case 'create':
+              resolve(this.createRole());
+              return;
+            case 'edit':
+              resolve(this.editRole());
+              return;
+          }
         }
       });
     });
@@ -143,6 +145,29 @@ class Query {
       });
       resolve(`Role ${this.role.title} created!`);
     });
+  }
+
+  // creates new role based on user input
+  editRole() {
+    let updateValue = '';
+    if (this.role.title) {
+      updateValue = this.role.title;
+      console.log(updateValue);
+    } else if (this.role.salary) {
+      updateValue = this.role.salary;
+      console.log(updateValue);
+    }
+    // return new Promise((resolve, reject) => {
+    //   connection.query('UPDATE department SET ? WHERE ?', [{ name: this.department.name }, { id: this.department.id }], (err, res) => {
+    //     if (err) {
+    //       reject({
+    //         name: 'Query Failed',
+    //         message: err
+    //       });
+    //     }
+    //   });
+    //   resolve(`Role ${this.role.title} created!`);
+    // });
   }
 
   // gets all employees
