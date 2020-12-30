@@ -379,10 +379,10 @@ const editRoleTitle = (answer, type) => {
       name: 'value',
       message: 'Enter the new value'
     }).then(title => {
-    const role = { id: answer.id, title: title.value };
-    checkDupRole(role, type);
-    return;
-  });
+      const role = { id: answer.id, title: title.value };
+      checkDupRole(role, type);
+      return;
+    });
 };
 // gahters the new salary for the role and sends the value to the EditRole query function
 const editRoleSalary = (answer) => {
@@ -392,25 +392,25 @@ const editRoleSalary = (answer) => {
       type: 'number',
       message: 'Enter the new value'
     }).then(async (salary) => {
-    try {
-      if (isNaN(salary.value)) {
-        console.log('Salary needs to be a numerical value. Please try again');
-        editRoleSalary(answer);
+      try {
+        if (isNaN(salary.value)) {
+          console.log('Salary needs to be a numerical value. Please try again');
+          editRoleSalary(answer);
+          return;
+        }
+        console.log(salary.value);
+        const roleInfo = { id: answer.id, salary: salary.value };
+        const roleQuery = new Query();
+        roleQuery.role = roleInfo;
+        const value = salary.value;
+        const editRole = await roleQuery.editRole(value, 'salary');
+        console.log(editRole);
+        editCaseWhereTo();
         return;
+      } catch (err) {
+        console.log(err);
       }
-      console.log(salary.value);
-      const roleInfo = { id: answer.id, salary: salary.value };
-      const roleQuery = new Query();
-      roleQuery.role = roleInfo;
-      const value = salary.value;
-      const editRole = await roleQuery.editRole(value, 'salary');
-      console.log(editRole);
-      editCaseWhereTo();
-      return;
-    } catch (err) {
-      console.log(err);
-    }
-  });
+    });
 };
 // gahters the new salary for the role and sends the value to the EditRole query function
 const editRoleDepartment = (answer, departments) => {
@@ -485,7 +485,7 @@ const enteredDupRole = (type) => {
         }
         getAllRolesIndex(null, type);
         return;
-    } 
+    }
   });
 };
 
@@ -542,14 +542,14 @@ const getEmpInfo = (roles, employees, type) => {
 };
 // gathers which employee the user would like to update and what info they would like to update
 const selectEmpEdit = (roles, employees) => {
-  const mappedEmployees = employees.map(({ id, first_name, last_name, title }) => ({ value: id, name: `${first_name} ${last_name} - ${title}` }));  
+  const mappedEmployees = employees.map(({ id, first_name, last_name, title }) => ({ value: id, name: `${first_name} ${last_name} - ${title}` }));
   const mappedRoles = roles.map(({ id, title }) => ({ value: id, name: title }));
   inquirer.prompt([
     {
       name: 'id',
       type: 'list',
       message: 'What employee would you like to edit?',
-      choices: mappedEmployees 
+      choices: mappedEmployees
     },
     {
       name: 'role',
@@ -571,38 +571,33 @@ const checkDupEmp = async (answer, type) => {
   const employeeQuery = new Query();
   employeeQuery.employee = answer;
   try {
-    const checkEmp = await employeeQuery.getEmployee(type);
+    const checkEmp = await employeeQuery.getEmployee();
     if (checkEmp.name === 'Potential Duplicate') {
-      enteredDupEmp(checkEmp, employeeQuery, type);
+      enteredDupEmp(checkEmp, employeeQuery);
       return;
     }
-    switch (type) {
-      case 'create':
-        console.log(checkEmp);
-        createCaseWhereTo();
-        return;
-    }
+    console.log(checkEmp);
+    createCaseWhereTo();
+    return;
   } catch (err) {
     console.log(err);
   }
 };
 // checks to see if the user would like to create the user that may be a duplicate
-const enteredDupEmp = (checkEmp, employeeQuery, type) => {
+const enteredDupEmp = (checkEmp, employeeQuery) => {
   inquirer.prompt({
     name: 'verify',
     type: 'confirm',
     message: `${checkEmp.message}. Would you like to continue with creation?`
   }).then(async (answer) => {
-    switch (type) {
-      case 'create':
-        if (!answer.verify) {
-          createCaseWhereTo();
-          return;
-        }
-        const createEmp = await employeeQuery.createEmployee();
-        console.log(createEmp);
-        createCaseWhereTo();
-        return;
+
+    if (!answer.verify) {
+      createCaseWhereTo();
+      return;
     }
+    const createEmp = await employeeQuery.createEmployee();
+    console.log(createEmp);
+    createCaseWhereTo();
+    return;
   });
 };

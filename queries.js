@@ -180,7 +180,7 @@ class Query {
   }
 
   // queries the database to verify if employee entered is a duplicate
-  getEmployee(type) {
+  getEmployee() {
     return new Promise((resolve, reject) => {
       connection.query(`SELECT first_name, last_name, role_id FROM employee WHERE first_name = '${this.employee.firstName}' AND last_name = '${this.employee.lastName}' AND role_id = '${this.employee.role}'`, (err, res) => {
         const response = res[0];
@@ -189,21 +189,20 @@ class Query {
             name: 'Query Failed',
             message: err
           });
+          return;
         } else if (response) {
           resolve({
             name: 'Potential Duplicate',
             message: 'An employee with that name and role already exists'
           });
-        } else {
-          switch (type) {
-            case 'create':
-              resolve(this.createEmployee());
-              return;
-          }
+          return;
         }
+        resolve(this.createEmployee());
+        return;
       });
     });
   }
+
 
   // creates new employee based on user input
   createEmployee() {
@@ -219,7 +218,7 @@ class Query {
       resolve(`Employee ${this.employee.firstName} ${this.employee.lastName} created!`);
     });
   }
-  
+
   // edits an employee role based on user input
   editEmployee() {
     return new Promise((resolve, reject) => {
