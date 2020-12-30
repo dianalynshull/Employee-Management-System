@@ -1,6 +1,6 @@
 const inquirer = require('inquirer');
 const Query = require('./queries');
-const consoleTable = require('console.table');
+require('console.table');
 
 const startEmployeeManager = () => {
   inquirer.prompt({
@@ -54,8 +54,8 @@ const createCase = () => {
         getAllDeps('create');
         return;
       case 'Create an employee':
-        // starts with getAllRoles function to get roles as a choice for the employee creation
-        getAllRoles('create');
+        // starts with getAllRolesIndex function to get roles as a choice for the employee creation
+        getAllRolesIndex('create');
         return;
       case 'Go Back':
         startEmployeeManager();
@@ -102,10 +102,10 @@ const viewCase = () => {
         getAllDeps('view');
         return;
       case 'View roles':
-        getAllRoles('view');
+        getAllRolesIndex('view');
         return;
       case 'View employees':
-        getAllEmployees(null, 'view');
+        getAllEmps(null, 'view');
         return;
       case 'Go Back':
         startEmployeeManager();
@@ -153,10 +153,10 @@ const editCase = () => {
         getAllDeps('edit');
         return;
       case 'Edit roles':
-        getAllRoles('edit');
+        getAllRolesIndex('edit');
         return;
       case 'Edit employees':
-        getAllEmployees(null, 'edit');
+        getAllEmps(null, 'edit');
         return;
       case 'Go Back':
         startEmployeeManager();
@@ -194,7 +194,7 @@ const getAllDeps = async (type) => {
     const getDeps = await departmentQuery.getAllDepartments();
     switch (type) {
       case 'create':
-        getRoleInfo(getDeps);
+        getRoleInfo(getDeps, type);
         return;
       case 'view':
         console.table(getDeps);
@@ -289,13 +289,13 @@ const enteredDupDep = (type) => {
 
 // ROLE FUNCTIONS
 // gets all roles
-const getAllRoles = async (type) => {
+const getAllRolesIndex = async (type) => {
   const roleQuery = new Query();
   try {
     const getRoles = await roleQuery.getAllRoles();
     switch (type) {
       case 'create':
-        getAllEmployees(getRoles, type);
+        getAllEmps(getRoles, type);
         return;
       case 'view':
         console.table(getRoles);
@@ -310,7 +310,7 @@ const getAllRoles = async (type) => {
   }
 };
 // gathers user's role info
-const getRoleInfo = (departments) => {
+const getRoleInfo = (departments, type) => {
   const mappedDepartments = departments.map(({ id, name }) => ({ value: id, name: name }));
   inquirer.prompt([
     {
@@ -331,21 +331,20 @@ const getRoleInfo = (departments) => {
   ]).then(answer => {
     if (isNaN(answer.salary)) {
       console.log('Salary needs to be a numerical value. Please try again');
-      const sendDepartments = departments;
-      getRoleInfo(sendDepartments);
+      getRoleInfo(departments, type);
       return;
     }
-    checkDupRole(answer);
+    checkDupRole(answer, type);
     return;
   });
 };
 const selectRoleEdit = (departments, type) => {
-  const mappedRoles = departments.map(({ id, title }) => ({ value: id, name: title}));
+  const mappedRoles = departments.map(({ id, title }) => ({ value: id, name: title }));
   inquirer.prompt([
     {
       name: 'id',
       type: 'list',
-      message:'What role would you like to edit?',
+      message: 'What role would you like to edit?',
       choices: mappedRoles
     },
     {
@@ -361,7 +360,7 @@ const selectRoleEdit = (departments, type) => {
   ]).then(answer => {
     switch (answer.type) {
       case 'Title':
-        const role = { id: answer.id, title: answer.value};
+        const role = { id: answer.id, title: answer.value };
         checkDupRole(role, type);
         return;
       case 'Salary':
@@ -390,39 +389,41 @@ const checkDupRole = async (answer, type) => {
     }
 
   } catch (err) {
-    console.log(err);
     if (err.name === 'Duplicate') {
-      enteredDupRole();
+      enteredDupRole(type);
       return;
     }
   }
 };
 // advises the user if their role title is a duplicate and gives them options on what to do next
-const enteredDupRole = () => {
+const enteredDupRole = (type) => {
   inquirer.prompt({
     name: 'tryAgain',
     type: 'confirm',
-    message: 'The role you entered has already been created. Would you like to create another role?'
+    message: 'The role you entered already exists. Would you like to try again?'
   }).then(answer => {
-    if (!answer.tryAgain) {
-      createCaseWhereTo();
-      return;
+    switch (type) {
+      case 'create':
+        if (!answer.tryAgain) {
+          createCaseWhereTo();
+          return;
+        }
+        console.log('test');
+        getAllDeps(type);
+        return;
     }
-    getAllDeps();
-    return;
   });
 };
 
 // EMPLOYEE FUNCTIONS
 // gets all employees
-const getAllEmployees = async (roles, type) => {
-  const roleList = roles;
+const getAllEmps = async (roles, type) => {
   const employeeQuery = new Query();
   try {
     const getEmployees = await employeeQuery.getAllEmployees();
     switch (type) {
       case 'create':
-        getEmpInfo(roleList, getEmployees);
+        getEmpInfo(roles, getEmployees, type);
         return;
       case 'view':
         console.table(getEmployees);
@@ -434,7 +435,7 @@ const getAllEmployees = async (roles, type) => {
   }
 };
 // gathers user's role info
-const getEmpInfo = (roles, employees) => {
+const getEmpInfo = (roles, employees, type) => {
   const mappedRoles = roles.map(({ id, title }) => ({ value: id, name: title }));
   const mappedEmployees = employees.map(({ id, first_name, last_name, title }) => ({ value: id, name: `${first_name} ${last_name} - ${title}` }));
   mappedEmployees.push({ value: null, name: 'Employee Will/Does Not Have Manager' });
@@ -460,42 +461,46 @@ const getEmpInfo = (roles, employees) => {
       choices: mappedEmployees
     }
   ]).then(answer => {
-    checkDupEmp(answer);
+    checkDupEmp(answer, type);
   });
 };
 // async function that runs Query function to see if an employee might be a duplicate
-const checkDupEmp = async (answer) => {
+const checkDupEmp = async (answer, type) => {
   const employeeQuery = new Query();
   employeeQuery.employee = answer;
   try {
-    const createEmployee = await employeeQuery.getEmployee();
-    if (createEmployee.name === 'Potential Duplicate') {
-      enteredDupEmp(createEmployee, employeeQuery);
+    const checkEmp = await employeeQuery.getEmployee(type);
+    if (checkEmp.name === 'Potential Duplicate') {
+      enteredDupEmp(checkEmp, employeeQuery, type);
       return;
     }
-    console.log(createEmployee);
-    createCaseWhereTo();
-    return;
+    switch (type) {
+      case 'create':
+        console.log(checkEmp);
+        createCaseWhereTo();
+        return;
+    }
   } catch (err) {
     console.log(err);
   }
 };
 
-const enteredDupEmp = (employee, Query) => {
-  const dupEmployee = employee;
-  const employeeQuery = Query;
+const enteredDupEmp = (checkEmp, employeeQuery, type) => {
   inquirer.prompt({
     name: 'verify',
     type: 'confirm',
-    message: `${dupEmployee.message}. Would you like to continue with creation?`
+    message: `${checkEmp.message}. Would you like to continue with creation?`
   }).then(async (answer) => {
-    if (!answer.verify) {
-      createCaseWhereTo();
-      return;
+    switch (type) {
+      case 'create':
+        if (!answer.verify) {
+          createCaseWhereTo();
+          return;
+        }
+        const createEmp = await employeeQuery.createEmployee();
+        console.log(createEmp);
+        createCaseWhereTo();
+        return;
     }
-    const createEmployee = await employeeQuery.createEmployee();
-    console.log(createEmployee);
-    createCaseWhereTo();
-    return;
   });
 };
