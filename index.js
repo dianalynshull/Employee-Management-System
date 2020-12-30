@@ -250,10 +250,9 @@ const checkDupDep = async (answer, type) => {
       case 'create':
         createCaseWhereTo();
         return;
-      case 'editDep': {
+      case 'editDep':
         editCaseWhereTo();
         return;
-      }
     }
   } catch (err) {
     if (err.name === 'Duplicate') {
