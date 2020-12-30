@@ -144,7 +144,7 @@ const editCase = () => {
     choices: [
       'Edit departments',
       'Edit roles',
-      'Edit employees',
+      'Edit employee role',
       'Go Back'
     ]
   }).then(answer => {
@@ -155,8 +155,8 @@ const editCase = () => {
       case 'Edit roles':
         getAllDeps('editRole');
         return;
-      case 'Edit employees':
-        getAllDeps('editEmp');
+      case 'Edit employee role':
+        getAllRolesIndex(null, 'editEmp');
         return;
       case 'Go Back':
         startEmployeeManager();
@@ -305,6 +305,9 @@ const getAllRolesIndex = async (department, type) => {
       case 'edit':
         selectRoleEdit(department, getRoles, type);
         return;
+      case 'editEmp':
+        getAllEmps(getRoles, type);
+        return;
     }
   } catch (err) {
     console.log(err);
@@ -442,6 +445,9 @@ const checkDupRole = async (answer, type) => {
       case 'edit':
         editCaseWhereTo();
         return;
+      case 'editEmp':
+        editCaseWhereTo();
+        return;
     }
   } catch (err) {
     if (err.name === 'Duplicate') {
@@ -472,7 +478,14 @@ const enteredDupRole = (type) => {
         }
         getAllRolesIndex(null, type);
         return;
-    }
+      case 'editEmp':
+        if (!answer.tryAgain) {
+          editCaseWhereTo();
+          return;
+        }
+        getAllRolesIndex(null, type);
+        return;
+    } 
   });
 };
 
@@ -490,6 +503,8 @@ const getAllEmps = async (roles, type) => {
         console.table(getEmployees);
         viewCaseWhereTo();
         return;
+      case 'editEmp':
+        selectEmpEdit(roles, getEmployees);
     }
   } catch (err) {
     console.log(err);
@@ -522,7 +537,33 @@ const getEmpInfo = (roles, employees, type) => {
       choices: mappedEmployees
     }
   ]).then(answer => {
-    checkDupEmp(answer, type);
+    checkDupEmp(answer);
+  });
+};
+// gathers which employee the user would like to update and what info they would like to update
+const selectEmpEdit = (roles, employees) => {
+  const mappedEmployees = employees.map(({ id, first_name, last_name, title }) => ({ value: id, name: `${first_name} ${last_name} - ${title}` }));  
+  const mappedRoles = roles.map(({ id, title }) => ({ value: id, name: title }));
+  inquirer.prompt([
+    {
+      name: 'id',
+      type: 'list',
+      message: 'What employee would you like to edit?',
+      choices: mappedEmployees 
+    },
+    {
+      name: 'role',
+      type: 'list',
+      message: 'What role would you like to assign them to?',
+      choices: mappedRoles
+    }
+  ]).then(async (answer) => {
+    const empQuery = new Query();
+    empQuery.employee = answer;
+    const editEmp = await empQuery.editEmployee();
+    console.log(editEmp);
+    editCaseWhereTo();
+    return;
   });
 };
 // async function that runs Query function to see if an employee might be a duplicate
@@ -545,7 +586,7 @@ const checkDupEmp = async (answer, type) => {
     console.log(err);
   }
 };
-
+// checks to see if the user would like to create the user that may be a duplicate
 const enteredDupEmp = (checkEmp, employeeQuery, type) => {
   inquirer.prompt({
     name: 'verify',

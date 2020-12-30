@@ -219,6 +219,21 @@ class Query {
       resolve(`Employee ${this.employee.firstName} ${this.employee.lastName} created!`);
     });
   }
+  
+  // edits an employee role based on user input
+  editEmployee() {
+    return new Promise((resolve, reject) => {
+      connection.query('UPDATE employee SET ? WHERE ?', [{ role_id: this.employee.role }, { id: this.employee.id }], (err, res) => {
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          });
+        }
+      });
+      resolve('Employee role updated!');
+    });
+  }
 }
 
 module.exports = Query;
