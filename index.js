@@ -55,7 +55,7 @@ const createCase = () => {
         return;
       case 'Create an employee':
         // starts with getAllRolesIndex function to get roles as a choice for the employee creation
-        getAllRolesIndex('create');
+        getAllRolesIndex(null, 'create');
         return;
       case 'Go Back':
         startEmployeeManager();
@@ -102,7 +102,7 @@ const viewCase = () => {
         getAllDeps('view');
         return;
       case 'View roles':
-        getAllRolesIndex('view');
+        getAllRolesIndex(null, 'view');
         return;
       case 'View employees':
         getAllEmps(null, 'view');
@@ -150,13 +150,13 @@ const editCase = () => {
   }).then(answer => {
     switch (answer.action) {
       case 'Edit departments':
-        getAllDeps('edit');
+        getAllDeps('editDep');
         return;
       case 'Edit roles':
-        getAllRolesIndex('edit');
+        getAllDeps('editRole');
         return;
       case 'Edit employees':
-        getAllEmps(null, 'edit');
+        getAllDeps('editEmp');
         return;
       case 'Go Back':
         startEmployeeManager();
@@ -200,10 +200,11 @@ const getAllDeps = async (type) => {
         console.table(getDeps);
         viewCaseWhereTo();
         return;
-      case 'edit': {
-        selectDepEdit(getDeps, type);
+      case 'editDep':
+        selectDepEdit(getDeps, 'edit');
         return;
-      }
+      case 'editRole':
+        getAllRolesIndex(getDeps, 'edit');
     }
   } catch (err) {
     console.log(err);
@@ -289,7 +290,7 @@ const enteredDupDep = (type) => {
 
 // ROLE FUNCTIONS
 // gets all roles
-const getAllRolesIndex = async (type) => {
+const getAllRolesIndex = async (department, type) => {
   const roleQuery = new Query();
   try {
     const getRoles = await roleQuery.getAllRoles();
@@ -302,7 +303,7 @@ const getAllRolesIndex = async (type) => {
         viewCaseWhereTo();
         return;
       case 'edit':
-        selectRoleEdit(getRoles, type);
+        selectRoleEdit(department, getRoles, type);
         return;
     }
   } catch (err) {
@@ -338,8 +339,9 @@ const getRoleInfo = (departments, type) => {
     return;
   });
 };
-const selectRoleEdit = (departments, type) => {
-  const mappedRoles = departments.map(({ id, title }) => ({ value: id, name: title }));
+// gathers which role the user would like to update and what info they would like to update
+const selectRoleEdit = (departments, roles, type) => {
+  const mappedRoles = roles.map(({ id, title }) => ({ value: id, name: title }));
   inquirer.prompt([
     {
       name: 'id',
@@ -351,28 +353,79 @@ const selectRoleEdit = (departments, type) => {
       name: 'type',
       type: 'list',
       message: 'What would you like to update?',
-      choices: ['Title', 'Salary']
-    },
+      choices: ['Title', 'Salary', 'Department']
+    }
+  ]).then((answer) => {
+    switch (answer.type) {
+      case 'Title':
+        editRoleTitle(answer, type);
+        return;
+      case 'Salary':
+        editRoleSalary(answer);
+        return;
+      case 'Department':
+        editRoleDepartment(answer, departments);
+        return;
+    }
+  });
+};
+// gathers the new title name for the role
+const editRoleTitle = (answer, type) => {
+  inquirer.prompt(
     {
       name: 'value',
       message: 'Enter the new value'
-    }
-  ]).then(async (answer) => {
-    switch (answer.type) {
-      case 'Title':
-        const role = { id: answer.id, title: answer.value };
-        checkDupRole(role, type);
+    }).then(title => {
+    const role = { id: answer.id, title: title.value };
+    checkDupRole(role, type);
+    return;
+  });
+};
+// gahters the new salary for the role and sends the value to the EditRole query function
+const editRoleSalary = (answer) => {
+  inquirer.prompt(
+    {
+      name: 'value',
+      type: 'number',
+      message: 'Enter the new value'
+    }).then(async (salary) => {
+    try {
+      if (isNaN(salary.value)) {
+        console.log('Salary needs to be a numerical value. Please try again');
+        editRoleSalary(answer);
         return;
-      case 'Salary':
-        const roleInfo = { id: answer.id, salary: answer.value };
-        const roleQuery = new Query();
-        roleQuery.role = roleInfo;
-        const value = answer.value;
-        const editStatus = await roleQuery.editRole(value, 'salary');
-        console.log(editStatus);
-        editCaseWhereTo();
-        return;
+      }
+      console.log(salary.value);
+      const roleInfo = { id: answer.id, salary: salary.value };
+      const roleQuery = new Query();
+      roleQuery.role = roleInfo;
+      const value = salary.value;
+      const editRole = await roleQuery.editRole(value, 'salary');
+      console.log(editRole);
+      editCaseWhereTo();
+      return;
+    } catch (err) {
+      console.log(err);
     }
+  });
+};
+// gahters the new salary for the role and sends the value to the EditRole query function
+const editRoleDepartment = (answer, departments) => {
+  const mappedDepartments = departments.map(({ id, name }) => ({ value: id, name: name }));
+  inquirer.prompt({
+    name: 'id',
+    type: 'list',
+    message: 'Which department would you like to assign the role to?',
+    choices: mappedDepartments
+  }).then(async (departmentAnswer) => {
+    const roleInfo = { id: answer.id, department: departmentAnswer.id };
+    const roleQuery = new Query();
+    roleQuery.role = roleInfo;
+    const value = departmentAnswer.id;
+    const editStatus = await roleQuery.editRole(value, 'department_id');
+    console.log(editStatus);
+    editCaseWhereTo();
+    return;
   });
 };
 // async function that funs Query function getRole to see if a role title is a duplicate
@@ -417,7 +470,7 @@ const enteredDupRole = (type) => {
           editCaseWhereTo();
           return;
         }
-        getAllRolesIndex(type);
+        getAllRolesIndex(null, type);
         return;
     }
   });
