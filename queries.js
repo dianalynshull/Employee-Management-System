@@ -13,6 +13,7 @@ class Query {
     this.department = departmentAnswer;
     this.role = roleAnswer;
     this.employee = employeeAnswer;
+    this.value;
   }
 
   getAllDepartments() {
@@ -124,7 +125,8 @@ class Query {
               resolve(this.createRole());
               return;
             case 'edit':
-              resolve(this.editRole());
+              this.role.value = this.role.title;
+              resolve(this.editRole(this.role.value, 'title'));
               return;
           }
         }
@@ -148,26 +150,18 @@ class Query {
   }
 
   // creates new role based on user input
-  editRole() {
-    let updateValue = '';
-    if (this.role.title) {
-      updateValue = this.role.title;
-      console.log(updateValue);
-    } else if (this.role.salary) {
-      updateValue = this.role.salary;
-      console.log(updateValue);
-    }
-    // return new Promise((resolve, reject) => {
-    //   connection.query('UPDATE department SET ? WHERE ?', [{ name: this.department.name }, { id: this.department.id }], (err, res) => {
-    //     if (err) {
-    //       reject({
-    //         name: 'Query Failed',
-    //         message: err
-    //       });
-    //     }
-    //   });
-    //   resolve(`Role ${this.role.title} created!`);
-    // });
+  editRole(roleValue, column) {
+    return new Promise((resolve, reject) => {
+      connection.query(`UPDATE role SET ${column} = '${roleValue}' WHERE ?`, { id: this.role.id }, (err, res) => {
+        if (err) {
+          reject({
+            name: 'Query Failed',
+            message: err
+          });
+        }
+        resolve(`Role ${column} has been updated to ${roleValue}!`);
+      });
+    });
   }
 
   // gets all employees

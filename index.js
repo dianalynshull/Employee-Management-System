@@ -357,7 +357,7 @@ const selectRoleEdit = (departments, type) => {
       name: 'value',
       message: 'Enter the new value'
     }
-  ]).then(answer => {
+  ]).then(async (answer) => {
     switch (answer.type) {
       case 'Title':
         const role = { id: answer.id, title: answer.value };
@@ -367,7 +367,10 @@ const selectRoleEdit = (departments, type) => {
         const roleInfo = { id: answer.id, salary: answer.value };
         const roleQuery = new Query();
         roleQuery.role = roleInfo;
-        roleQuery.editRole(type);
+        const value = answer.value;
+        const editStatus = await roleQuery.editRole(value, 'salary');
+        console.log(editStatus);
+        editCaseWhereTo();
         return;
     }
   });
@@ -387,7 +390,6 @@ const checkDupRole = async (answer, type) => {
         editCaseWhereTo();
         return;
     }
-
   } catch (err) {
     if (err.name === 'Duplicate') {
       enteredDupRole(type);
@@ -408,8 +410,14 @@ const enteredDupRole = (type) => {
           createCaseWhereTo();
           return;
         }
-        console.log('test');
         getAllDeps(type);
+        return;
+      case 'edit':
+        if (!answer.tryAgain) {
+          editCaseWhereTo();
+          return;
+        }
+        getAllRolesIndex(type);
         return;
     }
   });
