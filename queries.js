@@ -167,7 +167,7 @@ class Query {
   // gets all employees
   getAllEmployees() {
     return new Promise((resolve, reject) => {
-      connection.query('SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, role.id, role.title FROM employee INNER JOIN role ON employee.role_id=role.id', (err, res) => {
+      connection.query('SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, role.title FROM employee INNER JOIN role ON employee.role_id=role.id', (err, res) => {
         if (err) {
           reject({
             name: 'Query Failed',
