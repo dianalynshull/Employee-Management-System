@@ -50,7 +50,7 @@ class Query {
             case 'create':
               resolve(this.createDepartment());
               return;
-            case 'edit':
+            case 'editDep':
               resolve(this.editDepartment());
               return;
           }
