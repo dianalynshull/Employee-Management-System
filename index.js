@@ -201,7 +201,7 @@ const getAllDeps = async (type) => {
         viewCaseWhereTo();
         return;
       case 'editDep':
-        selectDepEdit(getDeps, 'edit');
+        selectDepEdit(getDeps, type);
         return;
       case 'editRole':
         getAllRolesIndex(getDeps, 'edit');
@@ -250,7 +250,7 @@ const checkDupDep = async (answer, type) => {
       case 'create':
         createCaseWhereTo();
         return;
-      case 'edit': {
+      case 'editDep': {
         editCaseWhereTo();
         return;
       }
@@ -268,7 +268,8 @@ const enteredDupDep = (type) => {
     name: 'tryAgain',
     type: 'confirm',
     message: 'The department you entered has already exists. Would you like to try again?'
-  }).then(answer => {
+  }).then((answer) => {
+    console.log(type);
     switch (type) {
       case 'create':
         if (!answer.tryAgain) {
@@ -277,7 +278,7 @@ const enteredDupDep = (type) => {
         }
         getDepInfo(type);
         return;
-      case 'edit':
+      case 'editDep':
         if (!answer.tryAgain) {
           editCaseWhereTo();
           return;
